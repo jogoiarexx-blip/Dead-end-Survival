@@ -1,0 +1,59 @@
+DEAD END SURVIVAL v0.2.3
+Desenvolvido por Luis Paulo Alves
+
+COMO INICIAR
+1. Extraia todo o conteúdo do ZIP.
+2. Na pasta do jogo, abra um terminal.
+3. Execute: python -m http.server 8080
+4. Abra no navegador: http://localhost:8080
+
+Também é possível publicar a pasta completa no GitHub Pages.
+O jogo usa módulos JavaScript; por isso, alguns navegadores bloqueiam a execução
+quando index.html é aberto diretamente com dois cliques.
+
+CONTROLES
+WASD ou setas: mover
+Mouse ou Espaço: atacar
+E: coletar e reparar
+R: recarregar
+1 a 6: selecionar arma desbloqueada
+Q: abrir arsenal
+B: construir barricada
+C: abrir crafting
+I: inventário
+Esc: pausar
+
+No celular, use o direcional e os botões exibidos na tela.
+
+NOVIDADES DESTA VERSÃO
+- 119 imagens WebP otimizadas e usadas pelo jogo.
+- Sobrevivente com poses de movimento e combate.
+- Walker, Runner e Brute com aparências e atributos próprios.
+- Bairro maior com câmera, base, locais e objetos exploráveis.
+- IA por visão, audição, perseguição e investigação de ruído.
+- Taco e pistola, stamina, munição, recarga e rastros de tiro.
+- Loot, inventário, medkit, construção e reparo da base.
+- XP, níveis, missões, dia/noite, save automático e hordas.
+- Menu, loading real de assets, pausa, configurações e controles móveis.
+- Colisão com prédios, carros, barricadas e cercas.
+- Preview de construção com validação de posição e distância.
+- Barricadas, cercas e armadilhas com durabilidade própria.
+- Zumbis atacam as defesas e a base durante as hordas.
+- Crafting de munição, medkit e kit de reparo.
+- Animações de dano, queda e morte para Walker, Runner e Brute.
+- Save de construções, contêineres vasculhados e estado da horda.
+- Machado, machete, shotgun e rifle desbloqueáveis no crafting.
+- Animações completas do sobrevivente usando cada nova arma.
+- Carregadores, munições e tempos de recarga separados.
+- Shotgun com múltiplos projéteis e rifle de longo alcance.
+- Efeitos WebP de disparo, impacto e golpes corpo a corpo.
+- Arsenal visual para selecionar apenas armas já desbloqueadas.
+- Mara, Rook e Eli adicionados à área da base.
+- Conversas e missões secundárias com progresso e recompensas.
+- Sistema funcional de troca de alimentos, sucata e munições.
+- Base evolui até o nível 3, com vida máxima e sprite próprios.
+- Missões, nível da base e recompensas permanecem no save.
+
+OBSERVAÇÃO
+Esta é uma versão de produção inicial. As próximas atualizações podem ampliar
+armas equipáveis, interiores, áudio e missões narrativas.

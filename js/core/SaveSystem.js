@@ -1,0 +1,1 @@
+export const SaveSystem={load(){try{return JSON.parse(localStorage.getItem('deadEndSurvivalSave'))||{}}catch{return{}}},save(data){try{localStorage.setItem('deadEndSurvivalSave',JSON.stringify(data))}catch{}}};

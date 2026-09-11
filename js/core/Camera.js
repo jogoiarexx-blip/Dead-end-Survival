@@ -1,0 +1,1 @@
+export class Camera{constructor(w,h){this.x=0;this.y=0;this.w=w;this.h=h}follow(p,world,dt){const tx=p.x-this.w/2,ty=p.y-this.h/2;this.x+=(tx-this.x)*Math.min(1,dt*6);this.y+=(ty-this.y)*Math.min(1,dt*6);this.x=Math.max(0,Math.min(world.w-this.w,this.x));this.y=Math.max(0,Math.min(world.h-this.h,this.y))}screenToWorld(x,y){return{x:x+this.x,y:y+this.y}}}

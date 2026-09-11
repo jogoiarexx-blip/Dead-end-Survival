@@ -1,0 +1,1 @@
+const defaults={resolution:'1280x720',quality:'auto',masterVolume:.7,musicVolume:.45,effectsVolume:.8};export const Settings={load(){try{return{...defaults,...JSON.parse(localStorage.getItem('desSettings'))}}catch{return{...defaults}}},set(k,v){const s=this.load();s[k]=v;localStorage.setItem('desSettings',JSON.stringify(s))}};

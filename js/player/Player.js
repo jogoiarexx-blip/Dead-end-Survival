@@ -1,0 +1,8 @@
+import { WeaponSystem } from '../weapons/WeaponSystem.js';
+export class Player{
+  constructor(x,y,save={}){this.x=save.x??x;this.y=save.y??y;this.r=20;this.speed=205;this.hp=save.hp??100;this.stamina=100;this.inventory={wood:0,scrap:0,food:0,meds:1,fuel:0,...save.inventory};this.level=save.level??1;this.xp=save.xp??0;this.attackCooldown=0;this.anim=0;this.moving=false;this.face=0;this.weapon=new WeaponSystem(this,save.weapon||{})}
+  update(dt,input,world){const v=input.axis();this.moving=Math.hypot(v.x,v.y)>.1;if(this.moving){world.move(this,v.x*this.speed*dt,v.y*this.speed*dt);this.anim+=dt*7;this.face=Math.abs(v.x)>Math.abs(v.y)?(v.x>0?1:3):(v.y>0?0:2)}this.attackCooldown=Math.max(0,this.attackCooldown-dt);this.stamina=Math.min(100,this.stamina+17*dt);this.weapon.update(dt)}
+  hit(dmg){this.hp=Math.max(0,this.hp-dmg)}gainXP(n){this.xp+=n;const need=this.level*100;if(this.xp>=need){this.xp-=need;this.level++;this.hp=100;return true}return false}
+  draw(g,a){const weapon=this.weapon.current,advanced=['axe','machete','shotgun','rifle'].includes(weapon);let im;if(advanced&&this.attackCooldown>0){const duration=this.weapon.config.cooldown,frame=Math.min(3,Math.floor((1-this.attackCooldown/duration)*4));im=a.playerWeapon(weapon,frame)}else{const row=this.attackCooldown>.18&&weapon==='bat'?2:this.moving?1:0,frame=row===1?4+(Math.floor(this.anim)%4):row===2?8+(Math.floor((.48-this.attackCooldown)*10)%4):this.face;im=a.player(frame)}if(im?.complete){const size=advanced?105:94;g.drawImage(im,this.x-size/2,this.y-size*.76,size,size)}}
+  serialize(){return{x:this.x,y:this.y,hp:this.hp,inventory:this.inventory,level:this.level,xp:this.xp,weapon:this.weapon.serialize()}}
+}
