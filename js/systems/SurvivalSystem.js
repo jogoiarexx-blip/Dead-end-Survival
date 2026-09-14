@@ -22,7 +22,7 @@ export class SurvivalSystem {
     if (player.inventory.food < 1) return { ok: false, msg: 'Nenhum alimento na mochila' };
     player.inventory.food--;
     this.hunger = Math.min(100, this.hunger + 34);
-    player.stamina = Math.min(100, player.stamina + 20);
+    player.stamina = Math.min(player.maxStamina || 100, player.stamina + 20);
     return { ok: true, msg: 'Alimento consumido: fome e energia recuperadas' };
   }
 

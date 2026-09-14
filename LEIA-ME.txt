@@ -1,71 +1,24 @@
-DEAD END SURVIVAL v0.3.0
-Desenvolvido por Luis Paulo Alves
+DEAD END SURVIVAL v0.3.4
 
-COMO INICIAR
-1. Extraia todo o conteúdo do ZIP.
-2. Na pasta do jogo, abra um terminal.
-3. Execute: python -m http.server 8080
-4. Abra no navegador: http://localhost:8080
+Desenvolvimento: Luis Paulo Alves
 
-Também é possível publicar a pasta completa no GitHub Pages.
-O jogo usa módulos JavaScript; por isso, alguns navegadores bloqueiam a execução
-quando index.html é aberto diretamente com dois cliques.
+COMO JOGAR
+Abra o jogo pelo GitHub Pages ou execute um servidor HTTP local na pasta do projeto.
 
 CONTROLES
-WASD ou setas: mover
-Mouse ou Espaço: atacar
-E: coletar e reparar
-R: recarregar
-1 a 6: selecionar arma desbloqueada
-Q: abrir arsenal
-B: construir barricada
-C: abrir crafting
-I: inventário
-Esc: pausar
+WASD - mover
+Clique - atacar
+E - interagir
+R - recarregar
+1 a 6 - trocar arma
+U - melhorias
+Q - arsenal
+B - construção
+C - crafting
+I - inventário
+ESC - pausa
 
-No celular, use o direcional e os botões exibidos na tela.
+HORDA
+O cronômetro das hordas só avança quando o jogador está no mapa da base. Fora da base nenhuma horda é simulada e a base não recebe dano invisível.
 
-NOVIDADES DESTA VERSÃO
-- 119 imagens WebP otimizadas e usadas pelo jogo.
-- Sobrevivente com poses de movimento e combate.
-- Walker, Runner e Brute com aparências e atributos próprios.
-- Bairro maior com câmera, base, locais e objetos exploráveis.
-- IA por visão, audição, perseguição e investigação de ruído.
-- Taco e pistola, stamina, munição, recarga e rastros de tiro.
-- Loot, inventário, medkit, construção e reparo da base.
-- XP, níveis, missões, dia/noite, save automático e hordas.
-- Menu, loading real de assets, pausa, configurações e controles móveis.
-- Colisão com prédios, carros, barricadas e cercas.
-- Preview de construção com validação de posição e distância.
-- Barricadas, cercas e armadilhas com durabilidade própria.
-- Zumbis atacam as defesas e a base durante as hordas.
-- Crafting de munição, medkit e kit de reparo.
-- Animações de dano, queda e morte para Walker, Runner e Brute.
-- Save de construções, contêineres vasculhados e estado da horda.
-- Machado, machete, shotgun e rifle desbloqueáveis no crafting.
-- Animações completas do sobrevivente usando cada nova arma.
-- Carregadores, munições e tempos de recarga separados.
-- Shotgun com múltiplos projéteis e rifle de longo alcance.
-- Efeitos WebP de disparo, impacto e golpes corpo a corpo.
-- Arsenal visual para selecionar apenas armas já desbloqueadas.
-- Mara, Rook e Eli adicionados à área da base.
-- Conversas e missões secundárias com progresso e recompensas.
-- Sistema funcional de troca de alimentos, sucata e munições.
-- Base evolui até o nível 3, com vida máxima e sprite próprios.
-- Missões, nível da base e recompensas permanecem no save.
-- Depósito funcional no Refúgio para guardar e retirar recursos.
-- Capacidade do depósito cresce de 40 para 80 e 140 com o nível da base.
-- Horta com três canteiros, desbloqueados progressivamente pelos níveis da base.
-- Plantações usam sementes, crescem durante 12 horas do jogo e geram alimento.
-- Progresso dos canteiros e conteúdo do depósito permanecem no save.
-- Indicadores no cenário e aviso de interação facilitam localizar as instalações.
-- Canteiros agora possuem sprites WebP próprios para os estados vazio, crescendo e pronto.
-- Os três canteiros aparecem separadamente no cenário e também na interface da horta.
-- Três interiores exploráveis: casa abandonada, mercado e loja do posto.
-- Entradas e saídas usam loading real e retornam à posição correta na rua.
-- Cada interior possui piso, props, colisões e loot temático próprios.
-- Interiores têm menos inimigos e carregam apenas seus assets exclusivos.
-
-OBSERVAÇÃO
-Esta é uma versão de produção inicial. As próximas atualizações podem ampliar
-interiores, áudio, eventos de exploração e missões narrativas.
+VERSÃO: 0.3.4
