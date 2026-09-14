@@ -1,4 +1,4 @@
-DEAD END SURVIVAL v0.2.3
+DEAD END SURVIVAL v0.3.0
 Desenvolvido por Luis Paulo Alves
 
 COMO INICIAR
@@ -53,7 +53,19 @@ NOVIDADES DESTA VERSÃO
 - Sistema funcional de troca de alimentos, sucata e munições.
 - Base evolui até o nível 3, com vida máxima e sprite próprios.
 - Missões, nível da base e recompensas permanecem no save.
+- Depósito funcional no Refúgio para guardar e retirar recursos.
+- Capacidade do depósito cresce de 40 para 80 e 140 com o nível da base.
+- Horta com três canteiros, desbloqueados progressivamente pelos níveis da base.
+- Plantações usam sementes, crescem durante 12 horas do jogo e geram alimento.
+- Progresso dos canteiros e conteúdo do depósito permanecem no save.
+- Indicadores no cenário e aviso de interação facilitam localizar as instalações.
+- Canteiros agora possuem sprites WebP próprios para os estados vazio, crescendo e pronto.
+- Os três canteiros aparecem separadamente no cenário e também na interface da horta.
+- Três interiores exploráveis: casa abandonada, mercado e loja do posto.
+- Entradas e saídas usam loading real e retornam à posição correta na rua.
+- Cada interior possui piso, props, colisões e loot temático próprios.
+- Interiores têm menos inimigos e carregam apenas seus assets exclusivos.
 
 OBSERVAÇÃO
 Esta é uma versão de produção inicial. As próximas atualizações podem ampliar
-armas equipáveis, interiores, áudio e missões narrativas.
+interiores, áudio, eventos de exploração e missões narrativas.
