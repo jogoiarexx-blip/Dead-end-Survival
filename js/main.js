@@ -1,15 +1,143 @@
-import{Save}from'./core/Save.js';import{Audio}from'./core/Audio.js';import{Game}from'./game/Game.js';import{CHARACTERS,STAGES,ENEMIES,UPGRADES,PERKS,ACH,WEAPONS}from'./data/content.js';
-const $=x=>document.getElementById(x),screens=['menu','loading','gameScreen'],show=id=>{screens.forEach(x=>$(x).classList.toggle('active',x===id))},modal=(id,on=true)=>$(id).classList.toggle('active',on);let save=Save.load(),audio=new Audio(save),game=new Game($('game'),save,audio,UI),selectedStage=Math.min(save.campaign,5)-1;
-const UI={toast(t){$('toast').textContent=t;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1600)},sync(){if(!game.run)return;const p=game.player,r=game.run,left=Math.max(0,300-r.time),ch=CHARACTERS.find(c=>c.id===save.selected);$('charName').textContent=ch.name;$('level').textContent=r.level;$('hp').style.width=100*p.hp/p.max+'%';$('timer').textContent=`${String(Math.floor(left/60)).padStart(2,'0')}:${String(Math.floor(left%60)).padStart(2,'0')}`;$('stageNo').textContent=game.stage+1;$('stageName').textContent=STAGES[game.stage].name;$('kills').textContent=r.kills;$('runScrap').textContent=r.scrap;$('xp').style.width=100*r.xp/r.next+'%';$('weaponHud').innerHTML=`<b>${p.weapon}</b><br><span>ESPECIAL ${p.special>0?Math.ceil(p.special)+'s':'PRONTO'}</span>`;$('bossHud').classList.toggle('show',!!r.boss&&!r.boss.dead);if(r.boss){$('bossName').textContent=r.boss.name;$('bossHp').style.width=100*r.boss.hp/r.boss.max+'%'}},pause(){if(!game.running)return;game.paused=!game.paused;modal('pause',game.paused)},upgrades(){const choices=[...UPGRADES].filter(u=>(game.run.ranks[u.id]||0)<u.max).sort(()=>Math.random()-.5).slice(0,3);$('upgradeCards').innerHTML=choices.map(u=>`<button class="card" data-up="${u.id}"><b>${u.name}</b><small>${u.desc}</small><span>Nível ${game.run.ranks[u.id]||0}/${u.max}</span></button>`).join('');$('rerollBtn').querySelector('i').textContent=game.run.rerolls;modal('upgrade');document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const id=b.dataset.up;game.run.ranks[id]=(game.run.ranks[id]||0)+1;if(id==='health'){game.player.max+=20;game.player.hp+=20}if(id==='speed')game.player.speed*=1.08;if(id==='crit')game.player.crit+=.08;if(id==='regen')game.player.regen+=.25;modal('upgrade',false);game.paused=false})},result(win,reward){Save.write(save);$('resultKicker').textContent=win?'ÁREA LIMPA':'SINAL PERDIDO';$('resultTitle').textContent=win?'MISSÃO CONCLUÍDA':'VOCÊ FOI CERCADO';$('resultStats').innerHTML=[['Tempo',fmt(game.run.time)],['Eliminações',game.run.kills],['Nível',game.run.level],['Dano',Math.round(game.run.damage)],['Sucata',reward],['Nota',win?game.run.taken<30?'S':'A':'—']].map(x=>`<div><span>${x[0]}</span><b>${x[1]}</b></div>`).join('');$('resultNext').textContent=win&&game.stage<4?'PRÓXIMA FASE':'JOGAR NOVAMENTE';$('resultNext').onclick=()=>launch(win&&game.stage<4?game.stage+1:game.stage);modal('result')}}
-function fmt(n){return`${Math.floor(n/60)}m ${Math.floor(n%60)}s`}
-async function launch(stage=selectedStage){modal('panel',false);modal('pause',false);modal('result',false);show('loading');$('loadName').textContent=STAGES[stage].name;$('loadTip').textContent=['Movimente-se sempre; o cerco fecha rápido.','Chefes mudam de padrão ao perder vida.','Guarde sucata para o Laboratório.'][stage%3];await game.loadStage(stage,p=>{$('loadBar').style.width=p+'%';$('loadPct').textContent=Math.round(p)+'%'});show('gameScreen');game.start(stage)}
-function panel(type){modal('panel');$('panelTitle').textContent={characters:'PERSONAGENS',arsenal:'ARSENAL',lab:'LABORATÓRIO',bestiary:'BESTIÁRIO',stats:'ESTATÍSTICAS',achievements:'CONQUISTAS',settings:'CONFIGURAÇÕES',credits:'CRÉDITOS'}[type];const body=$('panelBody');if(type==='characters'){body.innerHTML='<div class="grid">'+CHARACTERS.map((c,i)=>{const unlocked=save.unlocked.includes(c.id);return`<button class="card ${save.selected===c.id?'active':''} ${unlocked?'':'locked'}" data-char="${c.id}" ${unlocked?'':'disabled'}><img class="portrait" src="assets/characters/survivor/frame-00.webp" style="filter:hue-rotate(${i*48}deg)"><b>${c.name}</b><span>${c.weapon}</span><small>${c.passive}<br>Especial: ${c.special}</small>${unlocked?'':'<em>Derrote Paciente Ômega</em>'}</button>`}).join('')+'</div>';body.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{save.selected=b.dataset.char;Save.write(save);panel('characters')})}
-if(type==='arsenal')body.innerHTML='<div class="grid">'+Object.entries(WEAPONS).map(([n,w])=>`<div class="card"><b>${n}</b><span>Dano ${w.damage} • Cadência ${(1/w.rate).toFixed(1)}/s</span><small>${w.melee?'Combate corpo a corpo':w.count>1?w.count+' projéteis':'Disparo preciso'} • ${save.weapons.includes(n)?'DESBLOQUEADA':'BLOQUEADA'}</small></div>`).join('')+'</div>';
-if(type==='lab'){body.innerHTML=`<p>Sucata disponível: <b>${save.scrap}</b></p>`+PERKS.map(([n,id,c])=>{const rank=save.perks[id]||0,cost=c*(rank+1);return`<div class="perkRow"><span><b>${n}</b><small> Nível ${rank}/5</small></span><span>⚙ ${cost}</span><button data-perk="${id}" data-cost="${cost}" ${rank>=5||save.scrap<cost?'disabled':''}>MELHORAR</button></div>`}).join('');body.querySelectorAll('[data-perk]').forEach(b=>b.onclick=()=>{save.scrap-=+b.dataset.cost;save.perks[b.dataset.perk]=(save.perks[b.dataset.perk]||0)+1;Save.write(save);panel('lab')})}
-if(type==='bestiary')body.innerHTML='<div class="grid">'+Object.entries(ENEMIES).map(([id,e])=>`<div class="card"><b>${e.name}</b><span>Vida ${e.hp} • Dano ${e.dmg}</span><small>Encontrados: ${save.bestiary[id]||0}<br>${e.ranged?'Ataca à distância':e.aura?'Fortalece a horda':'Infectado hostil'}</small></div>`).join('')+STAGES.map(s=>`<div class="card"><b>CHEFE: ${s.boss}</b><small>${s.name}</small></div>`).join('')+'</div>';
-if(type==='stats'){const s=save.stats,fav=Object.entries(s.weapons).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';body.innerHTML=`<div class="resultGrid"><div><span>Tempo jogado</span><b>${fmt(s.time)}</b></div><div><span>Zumbis</span><b>${s.kills}</b></div><div><span>Bosses</span><b>${s.bosses}</b></div><div><span>Partidas</span><b>${s.runs}</b></div><div><span>Maior nível</span><b>${s.maxLevel}</b></div><div><span>Arma favorita</span><b>${fav}</b></div></div>`}
-if(type==='achievements')body.innerHTML='<div class="grid">'+ACH.map(([id,n,d,target])=>{const unlocked=save.achievements[id]||(id==='blood'&&save.stats.kills>=100)||(id==='exterminator'&&save.stats.kills>=1000)||(id==='apocalypse'&&save.stats.kills>=10000);return`<div class="card ${unlocked?'active':'locked'}"><b>${n}</b><small>${d}</small><span>${unlocked?'CONCLUÍDA':'EM PROGRESSO'}</span></div>`}).join('')+'</div>';
-if(type==='settings')body.innerHTML=[['quality','Qualidade','auto:Automático,low:Baixo,medium:Médio,high:Alto'],['resolution','Resolução','auto:Automática,480:480p,720:720p,1080:1080p'],['difficulty','Dificuldade','normal:Normal,hard:Difícil,nightmare:Pesadelo']].map(([id,n,ops])=>`<label class="setting">${n}<select data-setting="${id}">${ops.split(',').map(o=>{const[v,l]=o.split(':');return`<option value="${v}" ${save.settings[id]===v?'selected':''}>${l}</option>`}).join('')}</select></label>`).join('')+`<label class="setting">Música <input type="range" min="0" max="1" step=".05" value="${save.settings.music}" data-setting="music"></label><label class="setting">Efeitos <input type="range" min="0" max="1" step=".05" value="${save.settings.sfx}" data-setting="sfx"></label><label class="setting">Números de dano <input type="checkbox" ${save.settings.damageNumbers?'checked':''} data-setting="damageNumbers"></label>`;body.querySelectorAll('[data-setting]').forEach(x=>x.oninput=()=>{save.settings[x.dataset.setting]=x.type==='checkbox'?x.checked:x.type==='range'?+x.value:x.value;audio.cfg=save.settings;applyResolution();Save.write(save)})}
-if(type==='credits')body.innerHTML='<div class="card"><b>DEAD END: LAST SIGNAL</b><p>Criação e desenvolvimento<br><strong>Luis Paulo Alves</strong></p><small>Universo, personagens e sistemas originais. Áudio sintetizado em tempo real pelo navegador.</small></div>'}
-function applyResolution(){const v=save.settings.resolution,w=v==='1080'?1920:v==='720'?1280:v==='480'?854:Math.min(1280,innerWidth*devicePixelRatio),h=Math.round(w*9/16);game.c.width=w;game.c.height=h}applyResolution();
-document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>panel(b.dataset.panel));document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{const a=b.dataset.action;if(a==='play')launch();if(a==='resume')UI.pause();if(a==='restart')launch(game.stage);if(a==='quit'){game.stop();modal('pause',false);modal('result',false);show('menu')}});$('panelClose').onclick=()=>modal('panel',false);$('pauseBtn').onclick=()=>UI.pause();$('specialBtn').onclick=()=>game.special();$('rerollBtn').onclick=()=>{if(game.run.rerolls>0){game.run.rerolls--;UI.upgrades()}};const stick=$('joystick'),knob=stick.querySelector('i');let held=false;function joy(e){if(!held)return;const r=stick.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y)||1,m=Math.min(34,l);game.joy={x:x/l,y:y/l};knob.style.transform=`translate(${x/l*m}px,${y/l*m}px)`}stick.onpointerdown=e=>{held=true;stick.setPointerCapture(e.pointerId);joy(e)};stick.onpointermove=joy;stick.onpointerup=()=>{held=false;game.joy={x:0,y:0};knob.style.transform=''};if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+import { Save } from './core/Save.js';
+import { Audio } from './core/Audio.js';
+import { Game } from './game/Game.js';
+import { CHARACTERS, STAGES, ENEMIES, UPGRADES, PERKS, ACH, WEAPONS } from './data/content.js';
+
+const $ = id => document.getElementById(id);
+let save = Save.load();
+let audio = new Audio(save);
+let game;
+let selectedStage = Math.min(save.campaign, 5) - 1;
+const screens = ['menu','loading','gameScreen'];
+const show = id => screens.forEach(x => $(x).classList.toggle('active', x === id));
+const modal = (id,on=true) => $(id).classList.toggle('active',on);
+const fmt = n => Math.floor(n/60)+'m '+Math.floor(n%60)+'s';
+
+const UI = {
+  toast(text){
+    $('toast').textContent=text;
+    $('toast').classList.add('show');
+    setTimeout(()=>$('toast').classList.remove('show'),1500);
+  },
+  sync(){
+    if(!game.run)return;
+    const p=game.player,r=game.run,left=Math.max(0,300-r.time);
+    const ch=CHARACTERS.find(c=>c.id===save.selected);
+    $('charName').textContent=ch.name;
+    $('level').textContent=r.level;
+    $('hp').style.width=(100*p.hp/p.max)+'%';
+    $('timer').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(Math.floor(left%60)).padStart(2,'0');
+    $('stageNo').textContent=game.stage+1;
+    $('stageName').textContent=STAGES[game.stage].name;
+    $('kills').textContent=r.kills;
+    $('runScrap').textContent=r.scrap;
+    $('xp').style.width=(100*r.xp/r.next)+'%';
+    $('weaponHud').innerHTML='<b>'+p.weapon+'</b><br><span>ESPECIAL '+(p.special>0?Math.ceil(p.special)+'s':'PRONTO')+'</span>';
+    $('bossHud').classList.toggle('show',!!r.boss&&!r.boss.dead);
+    if(r.boss){$('bossName').textContent=r.boss.name;$('bossHp').style.width=(100*r.boss.hp/r.boss.max)+'%'}
+  },
+  pause(){
+    if(!game.running)return;
+    game.paused=!game.paused;
+    modal('pause',game.paused);
+  },
+  upgrades(){
+    const choices=[...UPGRADES].filter(u=>(game.run.ranks[u.id]||0)<u.max).sort(()=>Math.random()-.5).slice(0,3);
+    $('upgradeCards').innerHTML=choices.map(u=>'<button class="card" data-up="'+u.id+'"><b>'+u.name+'</b><small>'+u.desc+'</small><span>Nível '+(game.run.ranks[u.id]||0)+'/'+u.max+'</span></button>').join('');
+    $('rerollBtn').querySelector('i').textContent=game.run.rerolls;
+    modal('upgrade');
+    document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.up;
+      game.run.ranks[id]=(game.run.ranks[id]||0)+1;
+      if(id==='health'){game.player.max+=20;game.player.hp+=20}
+      if(id==='speed')game.player.speed*=1.08;
+      if(id==='crit')game.player.crit+=.08;
+      if(id==='regen')game.player.regen+=.25;
+      modal('upgrade',false);game.paused=false;
+    });
+  },
+  result(win,reward){
+    Save.write(save);
+    $('resultKicker').textContent=win?'ÁREA LIMPA':'SINAL PERDIDO';
+    $('resultTitle').textContent=win?'MISSÃO CONCLUÍDA':'VOCÊ FOI CERCADO';
+    const rows=[['Tempo',fmt(game.run.time)],['Eliminações',game.run.kills],['Nível',game.run.level],['Dano',Math.round(game.run.damage)],['Sucata',reward],['Nota',win?(game.run.taken<30?'S':'A'):'—']];
+    $('resultStats').innerHTML=rows.map(x=>'<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('');
+    $('resultNext').textContent=win&&game.stage<4?'PRÓXIMA FASE':'JOGAR NOVAMENTE';
+    $('resultNext').onclick=()=>launch(win&&game.stage<4?game.stage+1:game.stage);
+    modal('result');
+  }
+};
+
+game=new Game($('game'),save,audio,UI);
+
+async function launch(stage=selectedStage){
+  modal('panel',false);modal('pause',false);modal('result',false);
+  show('loading');$('loadName').textContent=STAGES[stage].name;
+  $('loadTip').textContent=['Movimente-se sempre; o cerco fecha rápido.','Chefes mudam de padrão ao perder vida.','Guarde sucata para o Laboratório.'][stage%3];
+  await game.loadStage(stage,p=>{$('loadBar').style.width=p+'%';$('loadPct').textContent=Math.round(p)+'%'});
+  show('gameScreen');game.start(stage);
+}
+
+function panel(type){
+  modal('panel'); 
+  const titles={characters:'PERSONAGENS',arsenal:'ARSENAL',lab:'LABORATÓRIO',bestiary:'BESTIÁRIO',stats:'ESTATÍSTICAS',achievements:'CONQUISTAS',settings:'CONFIGURAÇÕES',credits:'CRÉDITOS'};
+  $('panelTitle').textContent=titles[type];
+  const body=$('panelBody');
+  if(type==='characters'){
+    body.innerHTML='<div class="grid">'+CHARACTERS.map((c,i)=>{
+      const unlocked=save.unlocked.includes(c.id);
+      return '<button class="card '+(save.selected===c.id?'active ':'')+(unlocked?'':'locked')+'" data-char="'+c.id+'" '+(unlocked?'':'disabled')+'><img class="portrait" src="assets/characters/survivor/frame-00.webp" style="filter:hue-rotate('+(i*48)+'deg)"><b>'+c.name+'</b><span>'+c.weapon+'</span><small>'+c.passive+'<br>Especial: '+c.special+'</small>'+(unlocked?'':'<em>Derrote Paciente Ômega</em>')+'</button>';
+    }).join('')+'</div>';
+    body.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{save.selected=b.dataset.char;Save.write(save);panel('characters')});
+  } else if(type==='arsenal'){
+    body.innerHTML='<div class="grid">'+Object.entries(WEAPONS).map(([n,w])=>'<div class="card"><b>'+n+'</b><span>Dano '+w.damage+' • Cadência '+(1/w.rate).toFixed(1)+'/s</span><small>'+(w.melee?'Corpo a corpo':w.count>1?w.count+' projéteis':'Disparo preciso')+'</small></div>').join('')+'</div>';
+  } else if(type==='lab'){
+    body.innerHTML='<p>Sucata disponível: <b>'+save.scrap+'</b></p>'+PERKS.map(([n,id,c])=>{
+      const rank=save.perks[id]||0,cost=c*(rank+1);
+      return '<div class="perkRow"><span><b>'+n+'</b><small> Nível '+rank+'/5</small></span><span>⚙ '+cost+'</span><button data-perk="'+id+'" data-cost="'+cost+'" '+(rank>=5||save.scrap<cost?'disabled':'')+'>MELHORAR</button></div>';
+    }).join('');
+    body.querySelectorAll('[data-perk]').forEach(b=>b.onclick=()=>{save.scrap-=+b.dataset.cost;save.perks[b.dataset.perk]=(save.perks[b.dataset.perk]||0)+1;Save.write(save);panel('lab')});
+  } else if(type==='bestiary'){
+    body.innerHTML='<div class="grid">'+Object.entries(ENEMIES).map(([id,e])=>'<div class="card"><b>'+e.name+'</b><span>Vida '+e.hp+' • Dano '+e.dmg+'</span><small>Derrotados: '+(save.bestiary[id]||0)+'</small></div>').join('')+STAGES.map(s=>'<div class="card"><b>CHEFE: '+s.boss+'</b><small>'+s.name+'</small></div>').join('')+'</div>';
+  } else if(type==='stats'){
+    const s=save.stats,fav=Object.entries(s.weapons).sort((a,b)=>b[1]-a[1])[0]?.[0]||'—';
+    body.innerHTML='<div class="resultGrid">'+[['Tempo',fmt(s.time)],['Zumbis',s.kills],['Bosses',s.bosses],['Partidas',s.runs],['Maior nível',s.maxLevel],['Arma favorita',fav]].map(x=>'<div><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join('')+'</div>';
+  } else if(type==='achievements'){
+    body.innerHTML='<div class="grid">'+ACH.map(([id,n,d])=>{
+      const unlocked=save.achievements[id]||(id==='blood'&&save.stats.kills>=100)||(id==='exterminator'&&save.stats.kills>=1000)||(id==='apocalypse'&&save.stats.kills>=10000);
+      return '<div class="card '+(unlocked?'active':'locked')+'"><b>'+n+'</b><small>'+d+'</small><span>'+(unlocked?'CONCLUÍDA':'EM PROGRESSO')+'</span></div>';
+    }).join('')+'</div>';
+  } else if(type==='settings'){
+    const specs=[['quality','Qualidade',[['auto','Automático'],['low','Baixo'],['medium','Médio'],['high','Alto']]],['resolution','Resolução',[['auto','Automática'],['480','480p'],['720','720p'],['1080','1080p']]],['difficulty','Dificuldade',[['normal','Normal'],['hard','Difícil'],['nightmare','Pesadelo']]]];
+    body.innerHTML=specs.map(([id,n,ops])=>'<label class="setting">'+n+'<select data-setting="'+id+'">'+ops.map(([v,l])=>'<option value="'+v+'" '+(save.settings[id]===v?'selected':'')+'>'+l+'</option>').join('')+'</select></label>').join('')+'<label class="setting">Música <input type="range" min="0" max="1" step=".05" value="'+save.settings.music+'" data-setting="music"></label><label class="setting">Efeitos <input type="range" min="0" max="1" step=".05" value="'+save.settings.sfx+'" data-setting="sfx"></label><label class="setting">Números de dano <input type="checkbox" '+(save.settings.damageNumbers?'checked':'')+' data-setting="damageNumbers"></label>';
+    body.querySelectorAll('[data-setting]').forEach(x=>x.oninput=()=>{save.settings[x.dataset.setting]=x.type==='checkbox'?x.checked:x.type==='range'?+x.value:x.value;audio.cfg=save.settings;applyResolution();Save.write(save)});
+  } else {
+    body.innerHTML='<div class="card"><b>DEAD END: LAST SIGNAL</b><p>Criação e desenvolvimento<br><strong>Luis Paulo Alves</strong></p><small>Universo, personagens, áudio e sistemas originais.</small></div>';
+  }
+}
+
+function applyResolution(){
+  const v=save.settings.resolution,w=v==='1080'?1920:v==='720'?1280:v==='480'?854:Math.min(1280,innerWidth*devicePixelRatio);
+  game.c.width=w;game.c.height=Math.round(w*9/16);
+}
+applyResolution();
+
+document.querySelectorAll('[data-panel]').forEach(b=>b.onclick=()=>panel(b.dataset.panel));
+document.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{
+  const a=b.dataset.action;
+  if(a==='play')launch();
+  if(a==='resume')UI.pause();
+  if(a==='restart')launch(game.stage);
+  if(a==='quit'){game.stop();modal('pause',false);modal('result',false);show('menu')}
+});
+$('panelClose').onclick=()=>modal('panel',false);
+$('pauseBtn').onclick=()=>UI.pause();
+$('specialBtn').onclick=()=>game.special();
+$('rerollBtn').onclick=()=>{if(game.run.rerolls>0){game.run.rerolls--;UI.upgrades()}};
+
+const stick=$('joystick'),knob=stick.querySelector('i');let held=false;
+function joy(e){if(!held)return;const r=stick.getBoundingClientRect(),x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2,l=Math.hypot(x,y)||1,m=Math.min(34,l);game.joy={x:x/l,y:y/l};knob.style.transform='translate('+(x/l*m)+'px,'+(y/l*m)+'px)'}
+stick.onpointerdown=e=>{held=true;stick.setPointerCapture(e.pointerId);joy(e)};
+stick.onpointermove=joy;
+stick.onpointerup=()=>{held=false;game.joy={x:0,y:0};knob.style.transform=''};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
